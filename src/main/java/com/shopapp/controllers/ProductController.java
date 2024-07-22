@@ -1,5 +1,6 @@
 package com.shopapp.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.javafaker.Faker;
 import com.shopapp.dtos.*;
 import com.shopapp.models.Product;
@@ -7,6 +8,7 @@ import com.shopapp.models.ProductImage;
 import com.shopapp.responses.ProductListResponse;
 import com.shopapp.responses.ProductResponse;
 import com.shopapp.services.ProductService;
+import com.shopapp.services.interfaces.IProductRedisService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,7 +43,9 @@ import java.util.UUID;
 
 public class ProductController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
+    private final IProductRedisService productRedisService;
 
     @PostMapping("")
     @Operation(summary = "Create Product")
@@ -138,21 +144,53 @@ public class ProductController {
     @GetMapping("")
     @Operation(summary = "Get Product List")
     public ResponseEntity<ProductListResponse> getProducts(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit) {
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) throws JsonProcessingException {
 
+        int totalPages = 0;
         PageRequest pageRequest = PageRequest.of(
                 page, limit,
-                Sort.by("createdAt").descending());
-        Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
-        
-        int totalPages = productPage.getTotalPages();
-        List<ProductResponse> products = productPage.getContent();
+                //Sort.by("createdAt").descending()
+                Sort.by("id").ascending()
+        );
+
+        logger.info(String.format("keyword = %s, category_id = %d, page = %d, limit = %d",
+                keyword, categoryId, page, limit));
+
+        List<ProductResponse> productResponses = productRedisService
+                .getAllProducts(keyword, categoryId, pageRequest);
+
+        if (productResponses!=null && !productResponses.isEmpty()) {
+            totalPages = productResponses.get(0).getTotalPages();
+        }
+
+        if(productResponses == null) {
+            Page<ProductResponse> productPage = productService
+                    .getAllProducts(keyword, categoryId, pageRequest);
+            // Get total pages
+            totalPages = productPage.getTotalPages();
+            productResponses = productPage.getContent();
+            // Add total pages to each product response
+            for (ProductResponse product : productResponses) {
+                product.setTotalPages(totalPages);
+            }
+            
+            productRedisService.saveAllProducts(
+                    productResponses,
+                    keyword,
+                    categoryId,
+                    pageRequest
+            );
+        }
+
         return ResponseEntity.ok(ProductListResponse
-                .builder()
-                .products(products)
-                .totalPages(totalPages)
-                .build());
+                        .builder()
+                        .products(productResponses)
+                        .totalPages(totalPages)
+                        .build());
     }
 
     @GetMapping("/{id}")

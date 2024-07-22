@@ -4,13 +4,20 @@ import com.shopapp.models.Token;
 import com.shopapp.models.User;
 import com.shopapp.responses.LoginResponse;
 import com.shopapp.responses.RegisterResponse;
+import com.shopapp.responses.UserListResponse;
+import com.shopapp.responses.UserResponse;
 import com.shopapp.services.TokenService;
 import com.shopapp.services.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -112,4 +119,47 @@ public class UserController {
                             .build());
         }
     }
+
+    @GetMapping("")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all users")
+    public ResponseEntity<UserListResponse> getAllUser(
+            @RequestParam(defaultValue = "", required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        try {
+            PageRequest pageRequest = PageRequest.of(
+                    page,limit,
+                    Sort.by("id").descending()
+            );
+
+            Page<UserResponse> users = userService.findAll(keyword, pageRequest).map(UserResponse::fromUser);
+
+            int totalPages = users.getTotalPages();
+            List<UserResponse> userResponses = users.getContent();
+
+            return ResponseEntity.ok(UserListResponse.builder()
+                    .users(userResponses)
+                    .totalPages(totalPages)
+                    .build()); 
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);  
+        }
+    }
+
+    @PutMapping("/blockOrEnable/{userId}/{active}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Block or enable user")
+    public ResponseEntity<?> blockOrEnable(
+            @PathVariable Long userId,
+            @PathVariable boolean active) {
+        try {
+            userService.blockOrEnable(userId, active);
+            String message = active ? "User is enabled !" : "User is blocked !";
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

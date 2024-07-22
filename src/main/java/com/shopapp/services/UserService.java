@@ -3,6 +3,8 @@ package com.shopapp.services;
 import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import com.shopapp.repositories.RoleRepository;
 import com.shopapp.repositories.TokenRepository;
 import com.shopapp.repositories.UserRepository;
 import com.shopapp.services.interfaces.IUserService;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -101,6 +104,11 @@ public class UserService implements IUserService {
         Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
 
         if (user.isPresent()) {
+
+            if(user.get().isActive() == false) {
+                throw new Exception("User is blocked !");
+            }
+            
             return user.get();
         } else {
             throw new Exception("User not found");
@@ -111,6 +119,20 @@ public class UserService implements IUserService {
     public User getUserDetailsFromRefreshToken(String refreshToken) throws Exception {
         Token existingToken = tokenRepository.findByRefreshToken(refreshToken);
         return getUserDetailsFromToken(existingToken.getToken());
+    }
+
+    @Override
+    public Page<User> findAll(String keyword, Pageable pageable) throws Exception {
+        return userRepository.findAll(keyword, pageable);
+    }
+
+    @Override
+    @Transactional
+    public void blockOrEnable(Long userId, boolean active) throws Exception {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User not found !"));
+        existingUser.setActive(active);
+        userRepository.save(existingUser);              
     }
 
 }

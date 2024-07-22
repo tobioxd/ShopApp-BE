@@ -65,6 +65,8 @@ public class WebSecurityConfig {
                             .requestMatchers(
                                     String.format("%s/users/register", apiPrefix),
                                     String.format("%s/users/login", apiPrefix),
+                                    String.format("%s/healthcheck/health", apiPrefix),
+                                    String.format("%s/actuator/health", apiPrefix),
                                     String.format("%s/products/generateFakeProducts", apiPrefix),
                                     "/error",
                                     "/api-docs",

@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 
+@EntityListeners(ProductListener.class)
 public class Product extends BaseEntity{
 
     @Id
