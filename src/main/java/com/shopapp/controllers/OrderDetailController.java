@@ -4,7 +4,7 @@ import com.shopapp.dtos.*;
 import com.shopapp.exceptions.DataNotFoundException;
 import com.shopapp.models.OrderDetail;
 import com.shopapp.responses.OrderDetailResponse;
-import com.shopapp.services.OrderDetailService;
+import com.shopapp.services.impl.OrderDetailService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

@@ -7,7 +7,7 @@ import com.shopapp.models.Product;
 import com.shopapp.models.ProductImage;
 import com.shopapp.responses.ProductListResponse;
 import com.shopapp.responses.ProductResponse;
-import com.shopapp.services.ProductService;
+import com.shopapp.services.impl.ProductService;
 import com.shopapp.services.interfaces.IProductRedisService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -195,7 +195,6 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get Product By ProductId")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getProductById(
             @PathVariable("id") Long productId) {
         try {

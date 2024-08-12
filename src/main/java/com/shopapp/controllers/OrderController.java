@@ -3,7 +3,7 @@ package com.shopapp.controllers;
 import com.shopapp.dtos.*;
 import com.shopapp.models.Order;
 import com.shopapp.responses.OrderResponse;
-import com.shopapp.services.OrderService;
+import com.shopapp.services.impl.OrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

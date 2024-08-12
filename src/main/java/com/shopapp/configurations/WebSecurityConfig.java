@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
@@ -46,8 +47,9 @@ import java.util.List;
 
 import static org.springframework.http.HttpMethod.*;
 
+@SuppressWarnings("deprecation")
 @Configuration
-//@EnableMethodSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @EnableWebMvc
 @RequiredArgsConstructor
@@ -68,6 +70,7 @@ public class WebSecurityConfig {
                                     String.format("%s/healthcheck/health", apiPrefix),
                                     String.format("%s/actuator/health", apiPrefix),
                                     String.format("%s/products/generateFakeProducts", apiPrefix),
+                                    String.format("%s/products", apiPrefix),
                                     "/error",
                                     "/api-docs",
                                     "/api-docs/**",

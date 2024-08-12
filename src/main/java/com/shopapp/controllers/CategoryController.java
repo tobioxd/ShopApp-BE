@@ -3,7 +3,7 @@ package com.shopapp.controllers;
 import com.shopapp.dtos.*;
 import com.shopapp.models.Category;
 import com.shopapp.responses.UpdateCategoryResponse;
-import com.shopapp.services.CategoryService;
+import com.shopapp.services.impl.CategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

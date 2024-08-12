@@ -1,0 +1,20 @@
+services:
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - ./.docker/data/redis:/data
+
+
+  shopapp_be:
+    image: shopapp_be
+    ports:
+      - 80:80
+    links:
+      - redis
+    build:
+      dockerfile: Dockerfile
+      context: .

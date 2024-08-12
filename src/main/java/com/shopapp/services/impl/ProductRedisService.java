@@ -1,4 +1,4 @@
-package com.shopapp.services;
+package com.shopapp.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,6 +29,7 @@ public class ProductRedisService implements IProductRedisService {
         int pageNumber = pageRequest.getPageNumber();
         int pageSize = pageRequest.getPageSize();
         Sort sort = pageRequest.getSort();
+        @SuppressWarnings("null")
         String sortDirection = sort.getOrderFor("id")
                 .getDirection() == Sort.Direction.ASC ? "asc" : "desc";
         String key = String.format("all_products:%s:%d:%d:%d:%s",
@@ -54,7 +55,7 @@ public class ProductRedisService implements IProductRedisService {
         return productResponses;
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "null" })
     @Override
     public void clear() {
         redisTemplate.getConnectionFactory().getConnection().flushAll();

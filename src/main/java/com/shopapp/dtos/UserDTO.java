@@ -2,7 +2,6 @@ package com.shopapp.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Date;
@@ -38,9 +37,5 @@ public class UserDTO {
 
     @JsonProperty("google_account_id")
     private int googleAccountId;
-
-    @NotNull(message = "Role ID is required")
-    @JsonProperty("role_id")
-    private Long roleId;
 
 }
